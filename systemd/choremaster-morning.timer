@@ -1,0 +1,14 @@
+# Once a day at @MORNING_TIME@@ZONE_SUFFIX@ (a zone name after the time makes it that zone's wall clock across
+# daylight-saving changes; without one it is the machine's local zone).
+# Persistent=true: if the machine was down at that time the report runs once when it is back.
+[Unit]
+Description=Chore Master morning report, daily
+
+[Timer]
+OnCalendar=*-*-* @MORNING_TIME@:00@ZONE_SUFFIX@
+Persistent=true
+RandomizedDelaySec=0
+Unit=choremaster-morning.service
+
+[Install]
+WantedBy=timers.target

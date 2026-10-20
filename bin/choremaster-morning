@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# The morning run: a full tick, optionally retire finished chores, then print the digest and, when a
+# repository is configured, post it as a comment on the standing issue. Bash 3.2 safe.
+#
+#   1. choremaster tick          a full tick (best effort: its failures are recorded in the ledger)
+#   2. choremaster retire --apply  only when CHOREMASTER_RETIRE=1 (needs git and gh): remove finished chores
+#   3. choremaster report        the digest
+#   4. choremaster post-report   only when CHOREMASTER_POST_REPO=OWNER/REPO is set; on failure it prints the
+#                                digest and exits non-zero, so the journal shows the failure AND carries the digest.
+#
+# If the digest itself cannot be produced, say so and exit 1: a silent morning reads as a quiet day.
+#
+# Env: CHOREMASTER_CHORES, CHOREMASTER_STATE (see README), PYTHON (default python3; tests stub it),
+#      CHOREMASTER_POST_REPO / _TITLE / _MENTION / _LABEL (see post_report.py).
+set -u
+HERE="$(cd "$(dirname "$0")" && pwd)"
+CM="${PYTHON:-python3} $HERE/choremaster"
+
+$CM tick || echo "morning: tick exited $? (recorded in the ledger; the digest reports it)" >&2
+if [ "${CHOREMASTER_RETIRE:-0}" = 1 ]; then
+  $CM retire --apply >/dev/null || echo "morning: retire exited $? (the digest reports it)" >&2
+fi
+
+DIGEST="$($CM report)" || {
+  echo "morning: report failed; there is no digest to post" >&2
+  exit 1
+}
+
+if [ -n "${CHOREMASTER_POST_REPO:-}" ]; then
+  printf '%s\n' "$DIGEST" | $CM post-report
+else
+  printf '%s\n' "$DIGEST"
+fi

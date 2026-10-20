@@ -1,0 +1,19 @@
+# The morning run: a full tick, then the digest, printed to the journal and, when CHOREMASTER_POST_REPO is
+# set in the env file, posted as a comment on a standing GitHub issue. A failed post exits non-zero, so
+# `systemctl --failed` and the journal show it. See bin/choremaster-morning. Rendered by install.sh.
+[Unit]
+Description=Chore Master morning report
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+@SERVICE_USER_LINE@
+WorkingDirectory=@WORKDIR@
+Environment=HOME=@HOME@
+Environment=PATH=@HOME@/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+Environment=CHOREMASTER_CHORES=@CHORES@
+Environment=CHOREMASTER_STATE=@STATE@
+EnvironmentFile=-@ENV_FILE@
+ExecStart=/bin/bash @INSTALL_DIR@/bin/choremaster-morning
+TimeoutStartSec=1h

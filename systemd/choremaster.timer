@@ -1,0 +1,15 @@
+# Every 15 minutes on the quarter hour. OnCalendar rather than OnUnitActiveSec so that Persistent=true
+# works: a tick missed while the machine was down runs once at boot. No randomised delay: the heartbeat
+# check in the report expects a tick every 15 minutes, and a spread would only make it late.
+[Unit]
+Description=Chore Master tick, every 15 minutes
+
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+RandomizedDelaySec=0
+AccuracySec=1s
+Unit=choremaster.service
+
+[Install]
+WantedBy=timers.target

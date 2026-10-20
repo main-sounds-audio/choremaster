@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "choremaster"
+version = "0.1.0"
+description = "Chore Master: a small scheduler that runs chores (markdown files with a run: command) and prints a morning report"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+choremaster = "choremaster.__main__:main"
+
+[tool.setuptools]
+packages = ["choremaster"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

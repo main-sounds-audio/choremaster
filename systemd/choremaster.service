@@ -1,0 +1,24 @@
+# The Chore Master tick: no model, runs the due chores. Rendered by install.sh, which fills in the paths and
+# the user. A SYSTEM unit (or a user unit with `install.sh --user`), so it starts on boot.
+# /etc/choremaster/choremaster.env is optional (the leading "-"): put CHOREMASTER_TZ, secrets and other
+# variables the chores need there, mode 0600.
+[Unit]
+Description=Chore Master tick
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+@SERVICE_USER_LINE@
+WorkingDirectory=@WORKDIR@
+Environment=HOME=@HOME@
+Environment=PATH=@HOME@/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+Environment=CHOREMASTER_CHORES=@CHORES@
+Environment=CHOREMASTER_STATE=@STATE@
+EnvironmentFile=-@ENV_FILE@
+ExecStart=@PYTHON@ @INSTALL_DIR@/bin/choremaster tick
+# The tick exits 1 when a chore is outstanding, which is the normal case; only a crash (exit 2) or a signal
+# should leave the unit failed, so `systemctl --failed` means a broken tick.
+SuccessExitStatus=1
+# A hung chore must not wedge every later tick (the tick's own lock makes the next one exit at once).
+TimeoutStartSec=30min
